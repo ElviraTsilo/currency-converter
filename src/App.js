@@ -9,6 +9,7 @@ function App() {
     const [fromCurrency, setFromCurrency] = useState('USD');
     const [toCurrency, setToCurrency] = useState('EUR');
     const [currencies, setCurrencies] = useState({});
+    const [convertedAmount, setConvertedAmount] = useState(null);
 
     useEffect(() => {
         const apiKey = "6e54173bfb6faff2a307b9a54775fa196788ec3b";
@@ -27,17 +28,15 @@ function App() {
             setRate(1)
         } else {
             const apiKey = "6e54173bfb6faff2a307b9a54775fa196788ec3b";
-            axios.get(`https://api.getgeoapi.com/v2/currency/convert
-         ?api_key=${apiKey}&from=${fromCurrency}&to=${toCurrency}&amount=${amount}&format=json`)
+            axios.get(`https://api.getgeoapi.com/v2/currency/convert?api_key=${apiKey}&from=${fromCurrency}&to=${toCurrency}&amount=${amount}&format=json`)
                 .then(response => {
-                    const rate = response.data.rates[toCurrency].rate
-                    setRate(parseFloat(rate));
+                    setRate(response.data.rates[toCurrency].rate);
                 })
                 .catch(error => {
                     console.error('Error fetching currency rate:', error)
                 });
         }
-    }, [fromCurrency, toCurrency]);
+    }, [fromCurrency, toCurrency, amount]);
 
     function handleAmount(event) {
         event.preventDefault();
@@ -48,8 +47,8 @@ function App() {
         if (rate !== null) {
             const validAmount = parseFloat(amount);
             if (!isNaN(validAmount)) {
-                const convertAmount = amount * rate;
-                setRate(convertAmount);
+                const convertAmount = (validAmount * rate).toFixed(2);
+                setConvertedAmount(convertAmount);
             }
         }
     }
@@ -117,16 +116,16 @@ function App() {
                 </div>
                 <div className="row">
                     <div className="col-6">
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={convertCurrency}
-                >
-                    Convert
-                </button>
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={convertCurrency}
+                        >
+                            Convert
+                        </button>
                     </div>
                     <div className="col-6">
-                        <p>{rate}</p>
+                        <p>{amount} {fromCurrency} = {convertedAmount} {toCurrency}</p>
                     </div>
                 </div>
             </div>
