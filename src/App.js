@@ -8,10 +8,10 @@ function App() {
     const [amount, setAmount] = useState('');
     const [fromCurrency, setFromCurrency] = useState('USD');
     const [toCurrency, setToCurrency] = useState('EUR');
-    const [currencies, setCurrencies] = useState({}); // Initialize as an object
+    const [currencies, setCurrencies] = useState({});
 
     useEffect(() => {
-        const apiKey = "19b5e04dd65b88ae222c443580cb29af78e8f269";
+        const apiKey = "6e54173bfb6faff2a307b9a54775fa196788ec3b";
         axios.get(`https://api.getgeoapi.com/v2/currency/list?api_key=${apiKey}&format=json`)
             .then(response => {
                 const currencyData = response.data.currencies;
@@ -22,15 +22,37 @@ function App() {
             });
     }, []);
 
+    useEffect(() => {
+        if(fromCurrency === toCurrency) {
+            setRate(1)
+        } else {
+            const apiKey = "6e54173bfb6faff2a307b9a54775fa196788ec3b";
+            axios.get(`https://api.getgeoapi.com/v2/currency/convert
+         ?api_key=${apiKey}&from=${fromCurrency}&to=${toCurrency}&amount=${amount}&format=json`)
+                .then(response => {
+                    const rate = response.data.rates[toCurrency].rate
+                    setRate(parseFloat(rate));
+                })
+                .catch(error => {
+                    console.error('Error fetching currency rate:', error)
+                });
+        }
+    }, [fromCurrency, toCurrency]);
+
     function handleAmount(event) {
         event.preventDefault();
         setAmount(event.target.value);
     }
 
     function convertCurrency() {
-        // Implement your currency conversion logic here
+        if (rate !== null) {
+            const validAmount = parseFloat(amount);
+            if (!isNaN(validAmount)) {
+                const convertAmount = amount * rate;
+                setRate(convertAmount);
+            }
+        }
     }
-
     return (
         <div className="App">
             <h1>Currency Converter</h1>
@@ -93,6 +115,8 @@ function App() {
                         </div>
                     </div>
                 </div>
+                <div className="row">
+                    <div className="col-6">
                 <button
                     type="button"
                     className="btn btn-primary"
@@ -100,9 +124,13 @@ function App() {
                 >
                     Convert
                 </button>
+                    </div>
+                    <div className="col-6">
+                        <p>{rate}</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
-
 export default App;

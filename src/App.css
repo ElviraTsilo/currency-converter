@@ -27,3 +27,6 @@
     margin-top: 60px;
 }
 
+.App select {
+    color: #0a156d !important;
+}
